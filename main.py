@@ -1,7 +1,18 @@
-import log
 import logging.config
+import time
+
 import pandas as pd
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.svm import SVC
+
 import db
+import log
+# import matplotlib.pyplot as plt
 from model.Indicator import Indicator
 from model.PreviousPriceHolder import PreviousPriceHolder
 
@@ -10,19 +21,99 @@ logger = logging.getLogger("main")
 
 
 def main():
-    logger.info("starting ml evaluation")
+    crypto = 'BTC'
+    fiat = 'EUR'
+    period = 900
+    logger.info("starting ml data fetch for crypto: %s, fiat: %s, period: %s", crypto, fiat, period)
 
-    fiat_crypto_prices = db.get_fiat_crypto_prices()
-
+    fiat_crypto_prices = db.get_fiat_crypto_prices(crypto, fiat, period)
     column_names = create_df_column_names()
 
-    df = pd.DataFrame(columns=column_names)
-    previous_prices = PreviousPriceHolder()
+    all_metrics_df = create_all_metrics_df(column_names, fiat_crypto_prices)
 
+    logger.info('starting data preprocessing')
+    pre_time = time.time()
+
+    imputer = SimpleImputer(strategy="mean")
+    model = ExtraTreesClassifier(n_estimators=100)
+    X = all_metrics_df.iloc[:, 0:28]
+    # with sentiment
+    # X = all_metrics_df.iloc[:, 0:29]
+    X_copy = X.copy()
+    y = all_metrics_df.iloc[:, -1].astype('int32')
+
+    imputer.fit(X)
+    X = imputer.transform(X)
+
+    scaler = MinMaxScaler()
+    scaler.fit(X)
+    X = scaler.transform(X)
+
+    model.fit(X, y)
+
+    logger.info('data preprocessing finished, time: %0.3f seconds', time.time() - pre_time)
+
+    features = get_features_for_classifier(X_copy, model.feature_importances_, 14)
+
+    logger.info('selected features: %s', features)
+
+    svc_classifier = SVC(kernel='rbf')
+    C_range = [1, 10, 100, 1000]
+    gamma_range = [1e-3, 1e-4]
+    param_grid = dict(gamma=gamma_range, C=C_range)
+    df_model = pd.DataFrame(data=X, columns=column_names[0:28])
+
+    X_train, X_test, y_train, y_test = train_test_split(df_model[features], y, test_size=0.10)
+
+    clf = GridSearchCV(svc_classifier, param_grid, cv=5)
+
+    logger.info('classifier fitting starting')
+    fit_time = time.time()
+
+    clf.fit(X_train, y_train)
+
+    logger.info('classifier fitting finished, time: %0.3f seconds', time.time() - fit_time)
+
+    logger.info("The best parameters are %s with a score of %0.2f", clf.best_params_, clf.best_score_)
+
+    logger.info('starting predictions')
+    predict_time = time.time()
+    y_true, y_pred = y_test, clf.predict(X_test)
+    logger.info('predictions ended, time: %0.3f seconds', time.time() - predict_time)
+
+    logger.info(classification_report(y_true, y_pred))
+
+
+def get_features_for_classifier(X_copy, features, n):
+    feature_dict = create_feature_indicator_dict(features)
+    feature_importances = pd.Series(features, index=X_copy.columns)
+    n_important_features = feature_importances.nlargest(n)
+    # n_important_features.plot(kind='barh')
+    # plt.show()
+    # for feature in n_important_features.iteritems():
+    #     print(feature_dict.get(feature[1]))
+    return list(map(lambda feature: feature_dict.get(feature[1]), n_important_features.iteritems()))
+
+
+def create_all_metrics_df(column_names, fiat_crypto_prices):
+    all_metrics_df = pd.DataFrame(columns=column_names)
+
+    previous_prices = PreviousPriceHolder()
     for price in fiat_crypto_prices:
         df_dict = create_df_row_dict(previous_prices, price)
         row_df = pd.DataFrame(df_dict, index=[0])
-        df = df.append(row_df)
+        all_metrics_df = all_metrics_df.append(row_df, sort=False, ignore_index=True)
+    return all_metrics_df
+
+
+def create_feature_indicator_dict(features):
+    i = 0
+    feature_dict = {}
+    for ind in Indicator:
+        feature_dict[features.item(i)] = ind.value
+        i = i + 1
+
+    return feature_dict
 
 
 def create_df_row_dict(previous_prices, price):
@@ -31,12 +122,13 @@ def create_df_row_dict(previous_prices, price):
     logger.debug('ta_dict for price with id: %d is %s', price.id, df_dict)
 
     sentiment = db.get_sentiment(price.period, price.crypto_code, price.date_time)
-    df_dict['sentiment'] = sentiment
+    df_dict['SENTIMENT'] = sentiment
     logger.debug('sentiment for price with id: %d is %s', price.id, sentiment)
 
     change = get_previous_price(previous_prices, price)
+    df_dict['CHANGE'] = change
+
     previous_prices.insert(price.period, price.fiat_code, price.crypto_code, price.close)
-    df_dict['change'] = change
 
     return df_dict
 

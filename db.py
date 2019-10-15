@@ -24,11 +24,11 @@ except:
     logger.error("couldn't connect to db")
 
 
-def get_fiat_crypto_prices() -> Tuple[FiatCryptoPrice]:
-    return cursor_wrapper(get_fiat_crypto_prices_action)
+def get_fiat_crypto_prices(crypto_code: str, fiat_code: str, period: int) -> Tuple[FiatCryptoPrice]:
+    return cursor_wrapper(get_fiat_crypto_prices_action, crypto_code, fiat_code, period)
 
 
-def get_fiat_crypto_prices_action(cursor) -> Tuple[FiatCryptoPrice]:
+def get_fiat_crypto_prices_action(cursor, crypto_code: str, fiat_code: str, period: int) -> Tuple[FiatCryptoPrice]:
     cursor.execute(" select fc.id, "
                    "fc.high,"
                    "fc.low,"
@@ -43,8 +43,11 @@ def get_fiat_crypto_prices_action(cursor) -> Tuple[FiatCryptoPrice]:
                    " inner join period p on fc.period_id = p.id"
                    " inner join fiat f on fc.fiat_id = f.id"
                    " inner join crypto_currency currency on fc.cc_id = currency.id"
+                   " where currency.code = %s "
+                   " and f.code = %s "
+                   " and p.period = %s "
                    # " order by fc.date_time asc;")
-                   " order by fc.date_time desc limit 100")
+                   " order by fc.date_time desc limit 10", (crypto_code, fiat_code, period))
     fiat_crypto_tuples = cursor.fetchall()
 
     logger.debug('fetched %d fiat crypto prices', len(fiat_crypto_tuples))
