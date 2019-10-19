@@ -12,9 +12,10 @@ from sklearn.svm import SVC
 
 import db
 import log
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from model.Indicator import Indicator
 from model.PreviousPriceHolder import PreviousPriceHolder
+from joblib import dump, load
 
 logging.config.dictConfig(log.LOGGING_CONF)
 logger = logging.getLogger("main")
@@ -24,6 +25,8 @@ def main():
     crypto = 'BTC'
     fiat = 'EUR'
     period = 900
+    filename = crypto + '_' + fiat + '_' + str(period)
+
     logger.info("starting ml data fetch for crypto: %s, fiat: %s, period: %s", crypto, fiat, period)
 
     fiat_crypto_prices = db.get_fiat_crypto_prices(crypto, fiat, period)
@@ -44,16 +47,18 @@ def main():
 
     imputer.fit(X)
     X = imputer.transform(X)
+    dump(imputer, filename + '_imputer.joblib')
 
     scaler = MinMaxScaler()
     scaler.fit(X)
     X = scaler.transform(X)
+    dump(scaler, filename + '_scaler.joblib')
 
     model.fit(X, y)
 
     logger.info('data preprocessing finished, time: %0.3f seconds', time.time() - pre_time)
 
-    features = get_features_for_classifier(X_copy, model.feature_importances_, 14)
+    features = get_features_for_classifier(X_copy, model.feature_importances_, 14, filename + '.png')
 
     logger.info('selected features: %s', features)
 
@@ -83,15 +88,17 @@ def main():
 
     logger.info(classification_report(y_true, y_pred))
 
+    dump(clf, filename + '_clf.joblib')
 
-def get_features_for_classifier(X_copy, features, n):
+
+def get_features_for_classifier(X_copy, features, n, filename):
     feature_dict = create_feature_indicator_dict(features)
     feature_importances = pd.Series(features, index=X_copy.columns)
     n_important_features = feature_importances.nlargest(n)
-    # n_important_features.plot(kind='barh')
-    # plt.show()
-    # for feature in n_important_features.iteritems():
-    #     print(feature_dict.get(feature[1]))
+
+    feature_importances.plot(kind='barh')
+    plt.savefig(filename)
+
     return list(map(lambda feature: feature_dict.get(feature[1]), n_important_features.iteritems()))
 
 

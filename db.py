@@ -47,7 +47,7 @@ def get_fiat_crypto_prices_action(cursor, crypto_code: str, fiat_code: str, peri
                    " and f.code = %s "
                    " and p.period = %s "
                    # " order by fc.date_time asc;")
-                   " order by fc.date_time desc limit 10", (crypto_code, fiat_code, period))
+                   " order by fc.date_time desc limit 100", (crypto_code, fiat_code, period))
     fiat_crypto_tuples = cursor.fetchall()
 
     logger.debug('fetched %d fiat crypto prices', len(fiat_crypto_tuples))
