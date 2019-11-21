@@ -24,8 +24,13 @@ logger = logging.getLogger("main")
 def main():
     crypto = 'BTC'
     fiat = 'EUR'
-    period = 900
-    filename = crypto + '_' + fiat + '_' + str(period)
+    period = 3600
+    sentiment_switch = True
+
+    if sentiment_switch:
+        filename = crypto + '_' + fiat + '_' + str(period)
+    else:
+        filename = crypto + '_' + fiat + '_' + str(period) + '_no_sentiment'
 
     logger.info("starting ml data fetch for crypto: %s, fiat: %s, period: %s", crypto, fiat, period)
 
@@ -39,9 +44,13 @@ def main():
 
     imputer = SimpleImputer(strategy="mean")
     model = ExtraTreesClassifier(n_estimators=100)
-    X = all_metrics_df.iloc[:, 0:28]
+    # X = all_metrics_df.iloc[:, 0:28]
     # with sentiment
-    # X = all_metrics_df.iloc[:, 0:29]
+    if sentiment_switch:
+        X = all_metrics_df.iloc[:, 0:29]
+    else:
+        X = all_metrics_df.iloc[:, 0:28]
+
     X_copy = X.copy()
     y = all_metrics_df.iloc[:, -1].astype('int32')
 
@@ -66,7 +75,12 @@ def main():
     C_range = [1, 10, 100, 1000]
     gamma_range = [1e-3, 1e-4]
     param_grid = dict(gamma=gamma_range, C=C_range)
-    df_model = pd.DataFrame(data=X, columns=column_names[0:28])
+    # df_model = pd.DataFrame(data=X, columns=column_names[0:28])
+    # with sentiment
+    if sentiment_switch:
+        df_model = pd.DataFrame(data=X, columns=column_names[0:29])
+    else:
+        df_model = pd.DataFrame(data=X, columns=column_names[0:28])
 
     X_train, X_test, y_train, y_test = train_test_split(df_model[features], y, test_size=0.10)
 
@@ -92,14 +106,13 @@ def main():
 
 
 def get_features_for_classifier(X_copy, features, n, filename):
-    feature_dict = create_feature_indicator_dict(features)
     feature_importances = pd.Series(features, index=X_copy.columns)
     n_important_features = feature_importances.nlargest(n)
 
-    feature_importances.plot(kind='barh')
+    feature_importances.plot(kind='barh', fontsize=5, rot=45)
     plt.savefig(filename)
 
-    return list(map(lambda feature: feature_dict.get(feature[1]), n_important_features.iteritems()))
+    return n_important_features.index.tolist()
 
 
 def create_all_metrics_df(column_names, fiat_crypto_prices):
@@ -111,16 +124,6 @@ def create_all_metrics_df(column_names, fiat_crypto_prices):
         row_df = pd.DataFrame(df_dict, index=[0])
         all_metrics_df = all_metrics_df.append(row_df, sort=False, ignore_index=True)
     return all_metrics_df
-
-
-def create_feature_indicator_dict(features):
-    i = 0
-    feature_dict = {}
-    for ind in Indicator:
-        feature_dict[features.item(i)] = ind.value
-        i = i + 1
-
-    return feature_dict
 
 
 def create_df_row_dict(previous_prices, price):
@@ -143,7 +146,7 @@ def create_df_row_dict(previous_prices, price):
 def get_previous_price(previous_prices, price):
     previous_price = previous_prices.get(price.period, price.fiat_code, price.crypto_code)
     if previous_price:
-        return 1 if previous_price - price.close > 0 else 0
+        return 0 if previous_price - price.close > 0 else 1
     else:
         return 0
 

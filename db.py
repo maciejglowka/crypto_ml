@@ -43,11 +43,13 @@ def get_fiat_crypto_prices_action(cursor, crypto_code: str, fiat_code: str, peri
                    " inner join period p on fc.period_id = p.id"
                    " inner join fiat f on fc.fiat_id = f.id"
                    " inner join crypto_currency currency on fc.cc_id = currency.id"
-                   " where currency.code = %s "
+                   " where fc.date_time >= '2019-09-19 21:55:00'"
+                   " and currency.code = %s "
                    " and f.code = %s "
                    " and p.period = %s "
-                   # " order by fc.date_time asc;")
-                   " order by fc.date_time desc limit 100", (crypto_code, fiat_code, period))
+                   " order by fc.date_time asc", (crypto_code, fiat_code, period))
+                   # " order by fc.date_time asc limit 100", (crypto_code, fiat_code, period))
+                   # " order by fc.date_time desc limit 100", (crypto_code, fiat_code, period))
     fiat_crypto_tuples = cursor.fetchall()
 
     logger.debug('fetched %d fiat crypto prices', len(fiat_crypto_tuples))
