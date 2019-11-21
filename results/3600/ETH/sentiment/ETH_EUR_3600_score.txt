@@ -1,0 +1,19 @@
+1385
+
+INFO 2019-11-21 23:54:55,407 main 4510338496: selected features: ['MOM_1', 'MOM_3', 'ROCR_3', 'RSI_6', 'ROCR_12', 'WILLR', 'VOLUME', 'CCI_12', 'OBV', 'SMA_3', 'SENTIMENT', 'EMA_6', 'TSF_10', 'ICHIMOKU_TENKAN_SEN']
+INFO 2019-11-21 23:54:55,411 main 4510338496: classifier fitting starting
+INFO 2019-11-21 23:54:57,545 main 4510338496: classifier fitting finished, time: 2.134 seconds
+INFO 2019-11-21 23:54:57,545 main 4510338496: The best parameters are {'C': 1000, 'gamma': 0.001} with a score of 0.79
+INFO 2019-11-21 23:54:57,545 main 4510338496: starting predictions
+INFO 2019-11-21 23:54:57,552 main 4510338496: predictions ended, time: 0.007 seconds
+INFO 2019-11-21 23:54:57,558 main 4510338496:               precision    recall  f1-score   support
+
+           0       0.71      0.88      0.78        68
+           1       0.85      0.65      0.74        71
+
+    accuracy                           0.76       139
+   macro avg       0.78      0.77      0.76       139
+weighted avg       0.78      0.76      0.76       139
+
+
+Process finished with exit code 0
