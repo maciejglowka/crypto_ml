@@ -1,5 +1,6 @@
 import logging.config
 import time
+import math
 
 import pandas as pd
 from sklearn.ensemble import ExtraTreesClassifier
@@ -22,10 +23,10 @@ logger = logging.getLogger("main")
 
 
 def main():
-    crypto = 'BTC'
+    crypto = 'BCH'
     fiat = 'EUR'
-    period = 3600
-    sentiment_switch = True
+    period = 300
+    sentiment_switch = False
 
     if sentiment_switch:
         filename = crypto + '_' + fiat + '_' + str(period)
@@ -33,6 +34,9 @@ def main():
         filename = crypto + '_' + fiat + '_' + str(period) + '_no_sentiment'
 
     logger.info("starting ml data fetch for crypto: %s, fiat: %s, period: %s", crypto, fiat, period)
+
+    count = db.count_fiat_crypto_prices(crypto, fiat, period)
+    logger.info('fetched %s prices', count)
 
     fiat_crypto_prices = db.get_fiat_crypto_prices(crypto, fiat, period)
     column_names = create_df_column_names()
@@ -82,14 +86,25 @@ def main():
     else:
         df_model = pd.DataFrame(data=X, columns=column_names[0:28])
 
-    X_train, X_test, y_train, y_test = train_test_split(df_model[features], y, test_size=0.10)
+    df_model_feature = df_model[features]
+    train_count = math.floor(count * 0.9)
+    test_count = count - train_count
+    logger.info('split values: %s to %s', train_count, test_count)
+
+    y_train_split = y.head(train_count)
+    X_train_split = df_model_feature.iloc[:train_count, :]
+    y_test_split = y.tail(test_count)
+    X_test_split = df_model_feature.iloc[train_count:, :]
+
+    # X_train, X_test, y_train, y_test = train_test_split(X_train_split, y_train_split, test_size=0.10)
+    # X_train, X_test, y_train, y_test = train_test_split(df_model[features], y, test_size=0.10)
 
     clf = GridSearchCV(svc_classifier, param_grid, cv=5)
 
     logger.info('classifier fitting starting')
     fit_time = time.time()
 
-    clf.fit(X_train, y_train)
+    clf.fit(X_train_split, y_train_split)
 
     logger.info('classifier fitting finished, time: %0.3f seconds', time.time() - fit_time)
 
@@ -97,7 +112,7 @@ def main():
 
     logger.info('starting predictions')
     predict_time = time.time()
-    y_true, y_pred = y_test, clf.predict(X_test)
+    y_true, y_pred = y_test_split, clf.predict(X_test_split)
     logger.info('predictions ended, time: %0.3f seconds', time.time() - predict_time)
 
     logger.info(classification_report(y_true, y_pred))

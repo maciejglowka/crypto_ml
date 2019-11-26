@@ -1,0 +1,16 @@
+
+INFO 2019-11-25 22:42:36,795 main 4363242944: selected features: ['MOM_1', 'WILLR', 'RSI_6', 'CCI_12', 'MACD_HISTOGRAM', 'ROCR_3', 'CCI_20', 'MOM_3', 'RSI_12', 'ROCR_12', 'VOLUME', 'MACD_LINE', 'MFI_14', 'SENTIMENT']
+INFO 2019-11-25 22:42:36,799 main 4363242944: split values: 1340 to 149
+INFO 2019-11-25 22:42:36,799 main 4363242944: classifier fitting starting
+INFO 2019-11-25 22:42:39,186 main 4363242944: classifier fitting finished, time: 2.386 seconds
+INFO 2019-11-25 22:42:39,186 main 4363242944: The best parameters are {'C': 1000, 'gamma': 0.001} with a score of 0.78
+INFO 2019-11-25 22:42:39,186 main 4363242944: starting predictions
+INFO 2019-11-25 22:42:39,192 main 4363242944: predictions ended, time: 0.005 seconds
+INFO 2019-11-25 22:42:39,202 main 4363242944:               precision    recall  f1-score   support
+
+           0       0.84      0.90      0.87        73
+           1       0.90      0.83      0.86        76
+
+    accuracy                           0.87       149
+   macro avg       0.87      0.87      0.87       149
+weighted avg       0.87      0.87      0.87       149

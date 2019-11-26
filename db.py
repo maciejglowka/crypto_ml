@@ -24,6 +24,27 @@ except:
     logger.error("couldn't connect to db")
 
 
+def count_fiat_crypto_prices(crypto_code: str, fiat_code: str, period: int) -> int:
+    return cursor_wrapper(count_fiat_crypto_prices_action, crypto_code, fiat_code, period)
+
+
+def count_fiat_crypto_prices_action(cursor, crypto_code: str, fiat_code: str, period: int) -> int:
+    cursor.execute(" select count(*) "
+                   " from fc_market_price fc"
+                   " inner join period p on fc.period_id = p.id"
+                   " inner join fiat f on fc.fiat_id = f.id"
+                   " inner join crypto_currency currency on fc.cc_id = currency.id"
+                   " where fc.date_time >= '2019-09-19 21:55:00'"
+                   " and currency.code = %s "
+                   " and f.code = %s "
+                   " and p.period = %s ", (crypto_code, fiat_code, period))
+
+    count = cursor.fetchone()
+
+    return count[0]
+    # return 100
+
+
 def get_fiat_crypto_prices(crypto_code: str, fiat_code: str, period: int) -> Tuple[FiatCryptoPrice]:
     return cursor_wrapper(get_fiat_crypto_prices_action, crypto_code, fiat_code, period)
 
@@ -49,7 +70,7 @@ def get_fiat_crypto_prices_action(cursor, crypto_code: str, fiat_code: str, peri
                    " and p.period = %s "
                    " order by fc.date_time asc", (crypto_code, fiat_code, period))
                    # " order by fc.date_time asc limit 100", (crypto_code, fiat_code, period))
-                   # " order by fc.date_time desc limit 100", (crypto_code, fiat_code, period))
+    # " order by fc.date_time desc limit 100", (crypto_code, fiat_code, period))
     fiat_crypto_tuples = cursor.fetchall()
 
     logger.debug('fetched %d fiat crypto prices', len(fiat_crypto_tuples))

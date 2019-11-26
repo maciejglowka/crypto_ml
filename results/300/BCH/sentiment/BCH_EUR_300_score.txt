@@ -15,3 +15,9 @@ INFO 2019-11-22 18:06:11,071 main 4752027072:               precision    recall 
     accuracy                           0.83      1092
    macro avg       0.84      0.83      0.83      1092
 weighted avg       0.84      0.83      0.83      1092
+
+
+
+vmcl.pjwstk.edu.pl
+
+
