@@ -25,8 +25,8 @@ logger = logging.getLogger("main")
 def main():
     crypto = 'BCH'
     fiat = 'EUR'
-    period = 300
-    sentiment_switch = False
+    period = 3600
+    sentiment_switch = True
 
     if sentiment_switch:
         filename = crypto + '_' + fiat + '_' + str(period)

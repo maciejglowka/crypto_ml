@@ -1,0 +1,54 @@
+Poniżej przesyłam poprzednie wyniki oraz nowe, zgodne z Pana sugestią z poniedziałku co do zmiany sposobu testu skutecznosci modułu.
+W większości wypadków nowe rezultaty są delikatnie słabsze.
+
+
+Jak czytać wyniki:
+pierwsza wartość -> wynik według pierwszego sposobu testu, czyli 2 miesiące danych i na nich model wyuczony i przetestowany
+druga wartość -> wynik według poprawionego sposobu, czyli 2 miesiące danych podzielone 90/10, dane do testu nie biorą udziału w nauce modelu
+
+
+300 - 5 minut
+900 - 15 minut
+3600 - 60 minut
+
+BCH(300) + no_sentiment: 0.84/0.82
+BCH(300) + sentiment: 0.84/0.83 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+BCH(900) + no_sentiment: 0.80/0.86
+BCH(900) + sentiment: 0.83/0.86 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+BCH(3600) + no_sentiment: 0.82/0.58
+BCH(3600) + sentiment: 0.68/0.58
+
+----------------------------------
+
+BTC(300) + no_sentiment: 0.83/0.82
+BTC(300) + sentiment: 0.84/0.82 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+BTC(900) + no_sentiment: 0.85/0.80
+BTC(900) + sentiment: 0.83/0.80 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+BTC(3600) + no_sentiment: 0.80/0.87
+BTC(3600) + sentiment: 0.83/0.87
+
+----------------------------------
+
+ETH(300) + no_sentiment: 0.87/0.84
+ETH(300) + sentiment: 0.85/0.84 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+ETH(900) + no_sentiment: 0.85/0.82
+ETH(900) + sentiment: 0.86/0.82 (sentyment wedlug klasyfikatora nie zostal uwzględniony)
+
+ETH(3600) + no_sentiment: 0.79/0.81
+ETH(3600) + sentiment: 0.76/0.81
+
+
+W przeciągu 2 miesięcy zbierania danych BTC wahał się między 7500 a 10000$. ETH i BCH co do trendu zachowywały się podobnie.
+Na wykresie z tego okresu (19.09-19.11) widac większość typowych cech rynku kryptowalut, czyli ruch w bok, nagłe, kilkunasto procentowe wzrosty/spadki i
+delikatny trend spadkowy z chwilowymi wzrostami przez mniej więcej 20 dni.
+
+Co do wysokich wyników:
+Pomysł opiera się na tej pracy: http://cs229.stanford.edu/proj2014/Xinjie%20Di,%20Stock%20Trend%20Prediction%20with%20Technical%20Indicators%20using%20SVM.pdf
+
+Wynika autora dotyczące 3 spólek: Apple, Amazon i Microsoft, oscylują między 62 a 77%. Jeżeli wyjdziemy z założenia,
+że rynek kryptowalut jest zdominowany przez boty i trade'owanie algorytmiczne, uzyskane wyniki mogą być stosunkowo wiarygodne.
