@@ -1,0 +1,16 @@
+INFO 2020-01-11 23:30:54,915 main 4483657152: data preprocessing finished, time: 1.608 seconds
+INFO 2020-01-11 23:30:55,376 main 4483657152: selected features: ['MOM_1', 'RSI_6', 'WILLR', 'ROCR_3', 'MOM_3', 'VOLUME', 'ROCR_12', 'CCI_12', 'OBV', 'RSI_12', 'MACD_HISTOGRAM', 'SMA_3', 'CCI_20', 'MFI_14']
+INFO 2020-01-11 23:30:55,379 main 4483657152: split values: 8605 to 957
+INFO 2020-01-11 23:30:55,380 main 4483657152: classifier fitting starting
+INFO 2020-01-11 23:32:37,730 main 4483657152: classifier fitting finished, time: 102.350 seconds
+INFO 2020-01-11 23:32:37,730 main 4483657152: The best parameters are {'C': 1000, 'gamma': 0.001} with a score of 0.85
+INFO 2020-01-11 23:32:37,730 main 4483657152: starting predictions
+INFO 2020-01-11 23:32:37,901 main 4483657152: predictions ended, time: 0.171 seconds
+INFO 2020-01-11 23:32:37,908 main 4483657152:               precision    recall  f1-score   support
+
+           0       0.89      0.83      0.86       451
+           1       0.86      0.91      0.88       506
+
+    accuracy                           0.87       957
+   macro avg       0.88      0.87      0.87       957
+weighted avg       0.88      0.87      0.87       957
