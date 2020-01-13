@@ -23,9 +23,9 @@ logger = logging.getLogger("main")
 
 
 def main():
-    crypto = 'BTC'
+    crypto = 'ETH'
     fiat = 'EUR'
-    period = 900
+    period = 300
     sentiment_switch = False
 
     if sentiment_switch:
